@@ -24,7 +24,8 @@ def parse_post(path: Path) -> dict:
     # Strip the leading YYYY-MM-DD- prefix from the filename for the slug.
     slug = path.stem[11:] if len(path.stem) > 11 and path.stem[10] == "-" else path.stem
     date = post["date"]
-    url = date.strftime(f"/%Y/%m/%d/{slug}/")
+    # Site-relative URL (no leading slash) so it composes with the page's rel prefix.
+    url = date.strftime(f"%Y/%m/%d/{slug}/")
     return {
         "title": post["title"],
         "date": date,
@@ -48,10 +49,12 @@ def main() -> None:
     # Render each post page.
     post_tmpl = env.get_template("post.html")
     for post in posts:
-        out_dir = OUTPUT_DIR / post["url"].lstrip("/")
+        out_dir = OUTPUT_DIR / post["url"]
         out_dir.mkdir(parents=True, exist_ok=True)
+        # One "../" per path segment; post.url like "2026/07/01/slug/" has 4 slashes = 4 levels deep.
+        rel = "../" * post["url"].count("/")
         (out_dir / "index.html").write_text(
-            post_tmpl.render(post=post, site=config.SITE),
+            post_tmpl.render(post=post, site=config.SITE, rel=rel),
             encoding="utf-8",
         )
 
@@ -59,7 +62,7 @@ def main() -> None:
     index_tmpl = env.get_template("index.html")
     recent = posts[: config.SITE["recent_count"]]
     (OUTPUT_DIR / "index.html").write_text(
-        index_tmpl.render(posts=recent, site=config.SITE),
+        index_tmpl.render(posts=recent, site=config.SITE, rel=""),
         encoding="utf-8",
     )
 

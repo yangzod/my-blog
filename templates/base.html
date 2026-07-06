@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{{ site.title }}{% endblock %}</title>
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="{{ rel }}assets/css/style.css">
 </head>
 <body>
   <header>
-    <a href="/">{{ site.title }}</a>
+    <a href="{{ rel }}./index.html">{{ site.title }}</a>
   </header>
   <main>
     {% block content %}{% endblock %}
@@ -16,6 +16,6 @@
   <footer>
     <p>&copy; {{ site.author }}</p>
   </footer>
-  <script src="/assets/js/main.js"></script>
+  <script src="{{ rel }}assets/js/main.js"></script>
 </body>
 </html>
