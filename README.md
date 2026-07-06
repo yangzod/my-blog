@@ -9,7 +9,7 @@ pip install -r requirements.txt
 python build.py
 ```
 
-The build output (`index.html`, `YYYY/MM/DD/slug/index.html`, `assets/`) is written directly to the project root. Commit it alongside the source so GitHub Pages can serve it.
+The build output is written to `docs/` (`index.html`, `YYYY/MM/DD/slug/index.html`, `assets/`). Commit it alongside the source so GitHub Pages can serve it — in repo Settings → Pages, choose "Deploy from branch" and set the folder to `/docs`.
 
 ## Structure
 

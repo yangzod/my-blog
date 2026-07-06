@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render markdown posts to static HTML in the project root."""
+"""Render markdown posts to static HTML under docs/."""
 import shutil
 from pathlib import Path
 
@@ -13,7 +13,8 @@ ROOT = Path(__file__).parent
 POSTS_DIR = ROOT / "posts"
 TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
-ASSETS_DIR = ROOT / "assets"
+OUTPUT_DIR = ROOT / "docs"
+ASSETS_DIR = OUTPUT_DIR / "assets"
 
 
 def parse_post(path: Path) -> dict:
@@ -39,10 +40,15 @@ def main() -> None:
     post_paths = sorted(POSTS_DIR.glob("*.md"), reverse=True)
     posts = [parse_post(p) for p in post_paths]
 
+    # Clean output directory so deleted posts don't linger.
+    if OUTPUT_DIR.exists():
+        shutil.rmtree(OUTPUT_DIR)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
     # Render each post page.
     post_tmpl = env.get_template("post.html")
     for post in posts:
-        out_dir = ROOT / post["url"].lstrip("/")
+        out_dir = OUTPUT_DIR / post["url"].lstrip("/")
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(
             post_tmpl.render(post=post, site=config.SITE),
@@ -52,17 +58,15 @@ def main() -> None:
     # Render homepage with recent posts.
     index_tmpl = env.get_template("index.html")
     recent = posts[: config.SITE["recent_count"]]
-    (ROOT / "index.html").write_text(
+    (OUTPUT_DIR / "index.html").write_text(
         index_tmpl.render(posts=recent, site=config.SITE),
         encoding="utf-8",
     )
 
     # Copy static assets.
-    if ASSETS_DIR.exists():
-        shutil.rmtree(ASSETS_DIR)
     shutil.copytree(STATIC_DIR, ASSETS_DIR)
 
-    print(f"Built {len(posts)} posts.")
+    print(f"Built {len(posts)} posts into {OUTPUT_DIR}/")
 
 
 if __name__ == "__main__":
