@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Render markdown posts to static HTML under docs/."""
 import shutil
+from datetime import date
 from pathlib import Path
 
 import frontmatter
@@ -37,6 +38,7 @@ def parse_post(path: Path) -> dict:
 
 def main() -> None:
     env = Environment(loader=FileSystemLoader(TEMPLATES_DIR), autoescape=False)
+    build_date = date.today().isoformat()
 
     post_paths = sorted(POSTS_DIR.glob("*.md"), reverse=True)
     posts = [parse_post(p) for p in post_paths]
@@ -54,7 +56,7 @@ def main() -> None:
         # One "../" per path segment; post.url like "2026/07/01/slug/" has 4 slashes = 4 levels deep.
         rel = "../" * post["url"].count("/")
         (out_dir / "index.html").write_text(
-            post_tmpl.render(post=post, site=config.SITE, rel=rel),
+            post_tmpl.render(post=post, site=config.SITE, rel=rel, build_date=build_date),
             encoding="utf-8",
         )
 
@@ -62,7 +64,7 @@ def main() -> None:
     index_tmpl = env.get_template("index.html")
     recent = posts[: config.SITE["recent_count"]]
     (OUTPUT_DIR / "index.html").write_text(
-        index_tmpl.render(posts=recent, site=config.SITE, rel=""),
+        index_tmpl.render(posts=recent, site=config.SITE, rel="", build_date=build_date),
         encoding="utf-8",
     )
 
